@@ -1,0 +1,180 @@
+<?php namespace ProcessWire;
+
+/**
+ * Live Chat tawk.to
+ * Implements the live chat service from tawk.to
+ *
+ * @author tech-c.net
+ * @license Licensed under GNU/GPL v2
+ * @link https://tech-c.net/posts/website-live-chat-for-processwire/
+ * @version 1.0.2
+ * 
+ * @see Forum Thread: https://processwire.com/talk/topic/.../
+ * @see Donate: https://www.paypal.me/techcnet/
+ */
+
+class LiveChatTawkTo extends WireData implements Module, ConfigurableModule {
+  /**
+   * Return information about this module
+   */
+  public static function getModuleInfo() {
+    return array(
+      'title' => 'Live Chat tawk.to',
+      'summary' => 'Implements the live chat service from tawk.to',
+      'href' => 'https://tech-c.net/posts/website-live-chat-for-processwire/',
+      'author' => 'tech-c.net',
+      'version' => 102,
+      'icon' => 'comments',
+      'autoload' => true,
+      'singular' => true);
+  }
+  /**
+   * Instance of LiveChatTawkTo
+   */
+  public function __construct() {
+    foreach(self::getDefaultData() as $key => $value) {
+      $this->$key = $value;
+    }
+  }
+  /**
+   * Initialization function called before any execute functions
+   */
+  public function init() {
+    $this->addHookAfter('Page::render', $this, 'PageRender');
+  }
+  /**
+   * Default configuration for module
+   */
+  static public function getDefaultData() {
+    return array(
+      'active' => 1,
+      'templates' => 1,
+      'template_list' => array('admin', 'role', 'permission', 'user'),
+      'pages' => 0,
+      'page_list' => array(),
+      'script' => '',
+      'minify' => 1
+    );
+  }
+  /**
+   * Module settings
+   */
+  static public function getModuleConfigInputfields(array $data) {
+    $fields = new InputfieldWrapper();
+    $modules = wire('modules');
+    $defaults = self::getDefaultData();
+    $data = array_merge($defaults, $data);
+
+    $field = $modules->get('InputfieldCheckbox');
+    $field->name = 'active';
+    $field->label = __('Enable the live chat widget');
+    $field->description = __('When enabled, the live chat widget will be displayed on the specified pages.');
+    $field->attr('name', 'active');
+    $field->attr('checked', $data['active'] ? 'checked' : '');
+    $field->label2 = __('Enabled');
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldTextarea');
+    $field->name = 'script';
+    $field->label = __('Script');
+    $field->description = __('Paste here the script from your tawk.to account.');
+    $field->value = $data['script'];
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldCheckbox');
+    $field->name = 'minify';
+    $field->label = __('Minify');
+    $field->description = __('Remove line breaks and tabs from the script.');
+    $field->attr('name', 'minify');
+    $field->attr('checked', $data['minify'] ? 'checked' : '');
+    $field->label2 = __('Enabled');
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldSelect');
+    $field->name = 'templates';
+    $field->required = true;
+    $field->label = __('Templates');
+    $field->description = __('Hide or show the widget on the pages with templates listed below.');
+    $field->required = true;
+    $field->addOptions(array(
+      0 => 'Do not use the function',
+      1 => 'Hide',
+      2 => 'Show'
+    ));
+    $field->value = $data['templates'];
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldAsmSelect');
+    $field->name = 'template_list';
+    $field->label = ' ';
+    $templates = wire('templates');
+    foreach($templates as $template) {
+      $field->addOption($template->name);
+    }
+    $field->attr('value', $data['template_list']);
+    $field->collapsed = ($data['templates'] == 0);
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldSelect');
+    $field->name = 'pages';
+    $field->required = true;
+    $field->label = __('Pages');
+    $field->description = __('Hide or show the widget on the pages listed below.');
+    $field->required = true;
+    $field->addOptions(array(
+      0 => 'Do not use the function',
+      1 => 'Hide',
+      2 => 'Show'
+    ));
+    $field->value = $data['pages'];
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldPageListSelectMultiple');
+    $field->name = 'page_list';
+    $field->label = ' ';
+    $field->attr('value', $data['page_list']);
+    $field->collapsed = ($data['pages'] == 0);
+    $fields->add($field);
+
+    return $fields;
+  }
+  /**
+   * Inserts the script
+   */
+  public function PageRender(HookEvent $event) {
+    $data = $this->modules->getModuleConfigData($this->className);
+    $defaults = $this->modules->get($this->className)->getDefaultData();
+    $data = array_merge($defaults, $data);
+
+    if ($data['active'] == '1') {
+      $page = $event->object;
+      
+      switch ($data['templates']) {
+        case 1: 
+          if (in_array($page->template, $data['template_list'])) return;
+          break;
+        case 2:
+          if (!in_array($page->template, $data['template_list'])) return;
+          break;
+      }
+
+      switch ($data['pages']) {
+        case 1: 
+          if (in_array($page->id, $data['page_list'])) return;
+          break;
+        case 2:
+          if (!in_array($page->id, $data['page_list'])) return;
+          break;
+      }
+
+      $script = $data['script'];
+      if ($data['minify'] == '1') {
+        $script = str_replace("\n", "", $script);
+        $script = str_replace("\r", "", $script);
+        $script = str_replace("\t", "", $script);
+      }
+
+      $event->return = str_replace('</body>', $script.'</body>', $event->return);
+    }
+  }
+}
