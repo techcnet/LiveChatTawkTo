@@ -53,6 +53,7 @@ class LiveChatTawkTo extends WireData implements Module, ConfigurableModule {
       'pages' => 0,
       'page_list' => array(),
       'script' => '',
+      'loggedin' => 1,
       'minify' => 1
     );
   }
@@ -87,6 +88,15 @@ class LiveChatTawkTo extends WireData implements Module, ConfigurableModule {
     $field->description = __('Remove line breaks and tabs from the script.');
     $field->attr('name', 'minify');
     $field->attr('checked', $data['minify'] ? 'checked' : '');
+    $field->label2 = __('Enabled');
+    $fields->add($field);
+
+    $field = $modules->get('InputfieldCheckbox');
+    $field->name = 'loggedin';
+    $field->label = __('Loggedin users');
+    $field->description = __('Show the widget for loggedin users.');
+    $field->attr('name', 'loggedin');
+    $field->attr('checked', $data['loggedin'] ? 'checked' : '');
     $field->label2 = __('Enabled');
     $fields->add($field);
 
@@ -148,7 +158,11 @@ class LiveChatTawkTo extends WireData implements Module, ConfigurableModule {
 
     if ($data['active'] == '1') {
       $page = $event->object;
-      
+
+      if ($data['loggedin'] != '1') {
+        if (wire('user')->isLoggedin()) return;
+      }
+
       switch ($data['templates']) {
         case 1: 
           if (in_array($page->template, $data['template_list'])) return;
