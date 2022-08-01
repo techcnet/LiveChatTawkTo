@@ -1,7 +1,6 @@
 # Live Chat tawk.to
 
 ![GitHub](https://img.shields.io/github/license/techcnet/LiveChatTawkTo)
-![GitHub Sponsors](https://img.shields.io/github/sponsors/techcnet)
 ![GitHub last commit](https://img.shields.io/github/last-commit/techcnet/LiveChatTawkTo)
 [![PHPMD](https://github.com/techcnet/LiveChatTawkTo/actions/workflows/phpmd.yml/badge.svg)](https://github.com/techcnet/LiveChatTawkTo/actions/workflows/phpmd.yml)
 
