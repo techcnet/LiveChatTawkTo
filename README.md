@@ -2,7 +2,6 @@
 
 ![GitHub](https://img.shields.io/github/license/techcnet/LiveChatTawkTo)
 ![GitHub last commit](https://img.shields.io/github/last-commit/techcnet/LiveChatTawkTo)
-[![PHPMD](https://github.com/techcnet/LiveChatTawkTo/actions/workflows/phpmd.yml/badge.svg)](https://github.com/techcnet/LiveChatTawkTo/actions/workflows/phpmd.yml)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/techcnet)
 
 This module for ProcessWire implements the website live chat service from tawk.to. Actually the module doesn't have to do much. It just need to inserted a few lines of JavaScript just before the closing body tag </body> on each side. However, the module offers additional options to display the widget only on certain pages.
